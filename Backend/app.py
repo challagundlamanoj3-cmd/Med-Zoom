@@ -22,6 +22,17 @@ print("MONGO_URI loaded?:", bool(os.getenv("MONGO_URI")))
 
 app = Flask(__name__)
 
+# Test database connection
+try:
+    print("[DB] Testing database connection...")
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    client.server_info()  # Will throw an exception if can't connect
+    print("[DB] Database connection successful!")
+except Exception as e:
+    print(f"[DB] Database connection failed: {e}")
+    import traceback
+    traceback.print_exc()
+
 CORS(
     app,
     supports_credentials=True,
@@ -392,6 +403,20 @@ def get_all_users():
 
 
 if __name__ == "__main__":
+    print("[STARTUP] Starting Flask application...")
+    print(f"[STARTUP] Environment variables: {dict(os.environ)}")
+    print(f"[STARTUP] MONGO_URI present: {bool(os.getenv('MONGO_URI'))}")
+    print(f"[STARTUP] JWT_SECRET present: {bool(os.getenv('JWT_SECRET'))}")
+    print(f"[STARTUP] EMAIL_ADDRESS present: {bool(os.getenv('EMAIL_ADDRESS'))}")
+    print(f"[STARTUP] EMAIL_PASSWORD present: {bool(os.getenv('EMAIL_PASSWORD'))}")
+    
     # Use the PORT environment variable provided by Render, default to 3001 for local development
     port = int(os.environ.get("PORT", 3001))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    print(f"[STARTUP] Starting server on port {port}")
+    
+    try:
+        app.run(host="0.0.0.0", port=port, debug=False)
+    except Exception as e:
+        print(f"[STARTUP] Error starting server: {e}")
+        import traceback
+        traceback.print_exc()
