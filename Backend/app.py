@@ -255,13 +255,19 @@ def login():
     )
 
     resp = make_response(jsonify("Success"))
-    resp.set_cookie(
-        "token",
-        token,
-        httponly=True,
-        samesite="Lax",
-        secure=False
-    )
+    # Configure cookie for production deployment
+    cookie_kwargs = {
+        "httponly": True,
+        "samesite": "None",
+        "secure": True  # Should be True in production
+    }
+    
+    # For local development, use different settings
+    if os.environ.get("FLASK_ENV") == "development":
+        cookie_kwargs["samesite"] = "Lax"
+        cookie_kwargs["secure"] = False
+    
+    resp.set_cookie("token", token, **cookie_kwargs)
     
     # Add some debugging
     print(f"Setting cookie: token={token}")
@@ -309,7 +315,20 @@ def get_user():
 @app.post("/logout")
 def logout():
     resp = make_response(jsonify("Logged out"))
-    resp.set_cookie("token", "", expires=0, httponly=True, samesite="Lax", secure=False)
+    # Configure cookie for production deployment
+    cookie_kwargs = {
+        "expires": 0,
+        "httponly": True,
+        "samesite": "None",
+        "secure": True  # Should be True in production
+    }
+    
+    # For local development, use different settings
+    if os.environ.get("FLASK_ENV") == "development":
+        cookie_kwargs["samesite"] = "Lax"
+        cookie_kwargs["secure"] = False
+    
+    resp.set_cookie("token", "", **cookie_kwargs)
     return resp
 
 

@@ -16,10 +16,18 @@ function Login({ setIsLoggedIn }) {
     try {
       console.log("Attempting login with:", { username, password });
       
+      // Configure axios to send credentials
+      const config = {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+      
       const loginRes = await axios.post(
         api.login,
         { username, password },
-        { withCredentials: true }
+        config
       );
 
       console.log("Login response:", loginRes);
@@ -41,9 +49,16 @@ function Login({ setIsLoggedIn }) {
         console.log("Document cookies before user request:", document.cookie);
         
         // Use withCredentials to ensure cookies are sent with the request
+        const userConfig = {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+        
         const userRes = await axios.get(
           api.getUser,
-          { withCredentials: true }
+          userConfig
         );
 
         console.log("User response:", userRes);
