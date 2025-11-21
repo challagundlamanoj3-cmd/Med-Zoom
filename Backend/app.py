@@ -231,18 +231,26 @@ def signup():
 # ---------------- LOGIN ----------------
 @app.post("/login")
 def login():
+    print("[LOGIN] Request received")
+    print(f"[LOGIN] Request data: {request.json}")
+    print(f"[LOGIN] Request headers: {dict(request.headers)}")
+    
     data = request.json
     if not data:
         return jsonify("Invalid request"), 400
 
     username = data["username"]
     password = data["password"]
+    
+    print(f"[LOGIN] Attempting login for username: {username}")
 
     user = users.find_one({"username": username})
     if not user:
+        print(f"[LOGIN] User does not exist: {username}")
         return jsonify("User does not exist"), 400
 
     if not bcrypt.checkpw(password.encode(), user["password"]):
+        print(f"[LOGIN] Incorrect password for user: {username}")
         return jsonify("Incorrect password"), 400
 
     token = jwt.encode(
@@ -253,6 +261,8 @@ def login():
         JWT_SECRET,
         algorithm="HS256"
     )
+    
+    print(f"[LOGIN] Token generated: {token}")
 
     resp = make_response(jsonify("Success"))
     # Configure cookie for production deployment
@@ -270,9 +280,9 @@ def login():
     resp.set_cookie("token", token, **cookie_kwargs)
     
     # Add some debugging
-    print(f"Setting cookie: token={token}")
-    print(f"Cookie attributes: httponly=True, samesite=Lax, secure=False")
-    print(f"Response headers: {dict(resp.headers)}")
+    print(f"[LOGIN] Setting cookie: token={token}")
+    print(f"[LOGIN] Cookie attributes: {cookie_kwargs}")
+    print(f"[LOGIN] Response headers: {dict(resp.headers)}")
     
     return resp
 
@@ -280,15 +290,21 @@ def login():
 # ---------------- GET USER ----------------
 @app.get("/user")
 def get_user():
+    print("[GET USER] Request received")
+    print(f"[GET USER] Request headers: {dict(request.headers)}")
+    print(f"[GET USER] Request cookies: {request.cookies}")
+    
     # First try to get token from Authorization header (Bearer token)
     auth_header = request.headers.get('Authorization')
     token = None
     
     if auth_header and auth_header.startswith('Bearer '):
         token = auth_header.split('Bearer ')[1]
+        print(f"[GET USER] Token from Authorization header: {token}")
     else:
         # Fallback to cookie method
         token = request.cookies.get("token")
+        print(f"[GET USER] Token from cookies: {token}")
     
     print(f"[GET USER] Token received: {token}")
     
@@ -297,17 +313,21 @@ def get_user():
         return jsonify({"user": None})
 
     try:
+        print(f"[GET USER] Attempting to decode token: {token}")
         decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user = users.find_one({"_id": ObjectId(decoded["user_id"])}, {"password": 0})
+        print(f"[GET USER] Token decoded successfully: {decoded}")
         
-        print(f"[GET USER] Decoded token, user found: {user is not None}")
-
+        user = users.find_one({"_id": ObjectId(decoded["user_id"])}, {"password": 0})
+        print(f"[GET USER] User found in database: {user is not None}")
+        
         if user:
             user["_id"] = str(user["_id"])
 
         return jsonify({"user": user})
     except Exception as e:
         print(f"[GET USER] Error decoding token: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"user": None})
 
 
