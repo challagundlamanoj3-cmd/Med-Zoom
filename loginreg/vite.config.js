@@ -12,6 +12,13 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true, // Expose to network
       port: 5173
+    },
+    build: {
+      rollupOptions: {
+        input: {
+          main: './index.html'
+        }
+      }
     }
   }
 })
