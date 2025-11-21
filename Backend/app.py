@@ -36,10 +36,15 @@ except Exception as e:
 CORS(
     app,
     supports_credentials=True,
-    origins="*",  # Allow all origins for testing
-    allow_headers=["Content-Type", "Authorization"],
+    origins=[
+        "https://med-zoom-1.onrender.com",  # Your frontend domain
+        "https://med-zoom.onrender.com",   # Just in case
+        "http://localhost:5173",           # Local development
+        "http://127.0.0.1:5173"
+    ],
+    allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
     methods=["GET", "POST", "OPTIONS"],
-    expose_headers=["Access-Control-Allow-Credentials"],
+    expose_headers=["Access-Control-Allow-Credentials", "Access-Control-Allow-Origin"],
     max_age=86400
 )
 
@@ -159,19 +164,23 @@ def health_check():
     try:
         # Test database connection
         db.command('ping')
-        return jsonify({
+        response = jsonify({
             "status": "healthy", 
             "timestamp": datetime.datetime.utcnow(),
             "database": "connected",
             "service": "backend-running"
-        }), 200
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 200
     except Exception as e:
-        return jsonify({
+        response = jsonify({
             "status": "unhealthy", 
             "timestamp": datetime.datetime.utcnow(),
             "error": str(e),
             "service": "backend-running"
-        }), 500
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 500
 
 
 # ---------------- SEND OTP ----------------
@@ -205,10 +214,14 @@ def send_otp():
         
         if not success:
             print(f"⚠ Failed to send OTP email to {email}")
-            return jsonify({"error": "Failed to send OTP email. Please check your email address and try again."}), 500
+            response = jsonify({"error": "Failed to send OTP email. Please check your email address and try again."})
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response, 500
         
         print(f"✅ OTP email sent successfully to {email}")
-        return jsonify({"message": "OTP sent successfully"}), 200
+        response = jsonify({"message": "OTP sent successfully"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 200
     except Exception as e:
         print(f"[SEND OTP] Unexpected error: {e}")
         import traceback
