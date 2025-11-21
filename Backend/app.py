@@ -29,7 +29,8 @@ CORS(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://10.189.170.206:5173",
-        "https://medzoom-frontend.onrender.com"
+        "https://medzoom-frontend.onrender.com",
+        "https://med-zoom.onrender.com"
     ],
     allow_headers=["Content-Type", "Authorization"],
     methods=["GET", "POST", "OPTIONS"],

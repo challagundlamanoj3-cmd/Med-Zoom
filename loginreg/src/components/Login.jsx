@@ -76,8 +76,16 @@ function Login({ setIsLoggedIn }) {
         console.log("Error response status:", err.response.status);
         console.log("Error response data:", err.response.data);
         console.log("Error response headers:", err.response.headers);
+        alert("Login failed: " + (err.response?.data || err.message));
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.log("Error request:", err.request);
+        alert("Network error: Please check your internet connection and ensure the backend service is running.");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log("Error message:", err.message);
+        alert("Login error: " + err.message);
       }
-      alert("Login failed: " + (err.response?.data || err.message));
     }
   };
 
