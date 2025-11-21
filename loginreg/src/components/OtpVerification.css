@@ -1,0 +1,102 @@
+/* Page Background */
+.otp-verification-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f5f5f5; /* same as signup */
+}
+
+/* White Card */
+.otp-verification-container {
+    background: #fff;
+    padding: 40px 45px;
+    border-radius: 14px;
+    box-shadow: 0px 4px 20px rgba(0,0,0,0.08);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+/* Title */
+.otp-verification-container h2 {
+    margin-bottom: 20px;
+    color: #222;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+/* Info text */
+.otp-info {
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+/* OTP box container */
+.otp-box-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Each OTP Digit Box */
+.otp-box {
+    width: 48px;
+    height: 50px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 22px;
+    font-weight: 500;
+    text-align: center;
+    outline: none;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+/* Focus effect */
+.otp-box:focus {
+    border-color: #111;
+    box-shadow: 0px 0px 6px rgba(0,0,0,0.12);
+}
+
+/* Button styling (same as signup) */
+.otp-verification-container button {
+    padding: 14px;
+    width: 100%;
+    background: #333; /* same button as signup */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.otp-verification-container button:hover:not(:disabled) {
+    background: #000;
+}
+
+.otp-verification-container button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Resend text */
+.resend-info {
+    margin-top: 15px;
+    color: #555;
+    font-size: 14px;
+}
+
+.resend-info a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.resend-info a:hover {
+    text-decoration: underline;
+}

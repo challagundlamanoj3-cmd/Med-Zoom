@@ -1,0 +1,28 @@
+/* Navbar main container */
+.navbar {
+    width: 100%;
+    height: 60px;
+    background-color: #333;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+
+    box-sizing: border-box;
+}
+
+/* Project title text */
+.navbar-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Right section (Profile*
