@@ -21,7 +21,21 @@ function SignUp() {
         
         setLoading(true);
         try {
-            const response = await axios.post(api.sendOtp, { email });
+            console.log("[SEND OTP] Attempting to send OTP to:", email);
+            console.log("[SEND OTP] API endpoint:", api.sendOtp);
+            
+            // Configure axios with proper settings
+            const config = {
+                timeout: 10000, // 10 second timeout
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            const response = await axios.post(api.sendOtp, { email }, config);
+            console.log("[SEND OTP] Response received:", response);
+            
             if (response.status === 200) {
                 window.alert("OTP sent to your email. Please check your inbox.");
                 // Navigate to OTP verification page with user data
@@ -30,15 +44,19 @@ function SignUp() {
                 });
             }
         } catch (err) {
-            if (err.response && err.response.data.error) {
-                window.alert(err.response.data.error);
+            console.error("[SEND OTP] Error occurred:", err);
+            
+            if (err.response) {
+                // Server responded with error status
+                console.error("[SEND OTP] Response error:", err.response.status, err.response.data);
+                window.alert("Server error: " + (err.response.data.error || err.response.data || "Unknown server error"));
             } else if (err.request) {
-                // The request was made but no response was received
-                console.error("Send OTP Error - No response received:", err.request);
+                // Request was made but no response received
+                console.error("[SEND OTP] No response received:", err.request);
                 window.alert("Network error: Please check your internet connection and ensure the backend service is running at " + api.sendOtp);
             } else {
-                // Something happened in setting up the request that triggered an Error
-                console.error("Send OTP Error:", err.message);
+                // Something happened in setting up the request
+                console.error("[SEND OTP] Request setup error:", err.message);
                 window.alert("Failed to send OTP: " + err.message);
             }
         } finally {

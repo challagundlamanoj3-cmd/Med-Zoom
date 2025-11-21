@@ -156,7 +156,14 @@ def generate_otp():
 # ---------------- TEST ENDPOINT ----------------
 @app.get("/test")
 def test():
-    return jsonify({"message": "Backend running!", "status": "success"}), 200
+    print("[TEST] Test endpoint accessed")
+    response = jsonify({
+        "message": "Backend running!", 
+        "status": "success",
+        "timestamp": datetime.datetime.utcnow()
+    })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response, 200
 
 # ---------------- HEALTH CHECK ENDPOINT ----------------
 @app.get("/health")
