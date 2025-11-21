@@ -337,10 +337,18 @@ def login():
     
     resp.set_cookie("token", token, **cookie_kwargs)
     
+    # Add CORS headers explicitly
+    resp.headers.add('Access-Control-Allow-Credentials', 'true')
+    resp.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+    
     # Add some debugging
     print(f"[LOGIN] Setting cookie: token={token}")
     print(f"[LOGIN] Cookie attributes: {cookie_kwargs}")
     print(f"[LOGIN] Response headers: {dict(resp.headers)}")
+    
+    # Additional debugging for CORS
+    print(f"[LOGIN] Origin header: {request.headers.get('Origin')}")
+    print(f"[LOGIN] Credentials mode: {request.headers.get('Authorization')}")
     
     return resp
 

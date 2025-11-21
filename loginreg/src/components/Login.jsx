@@ -47,6 +47,10 @@ function Login({ setIsLoggedIn }) {
         
         // Log document cookies before making the user request
         console.log("Document cookies before user request:", document.cookie);
+        console.log("Response headers:", loginRes.headers);
+        
+        // Small delay to ensure cookie is set
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         // Use withCredentials to ensure cookies are sent with the request
         const userConfig = {
@@ -56,10 +60,20 @@ function Login({ setIsLoggedIn }) {
           }
         };
         
-        const userRes = await axios.get(
-          api.getUser,
-          userConfig
-        );
+        // Retry mechanism for user fetch
+        let userRes;
+        let retries = 3;
+        while (retries > 0) {
+          try {
+            userRes = await axios.get(api.getUser, userConfig);
+            break;
+          } catch (err) {
+            if (retries === 1) throw err; // Last retry, let it throw
+            console.log(`User fetch failed, retrying... (${retries} retries left)`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            retries--;
+          }
+        }
 
         console.log("User response:", userRes);
         console.log("User response status:", userRes.status);
