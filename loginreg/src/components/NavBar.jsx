@@ -1,6 +1,6 @@
 import React from "react";
 import ProfileMenu from "./ProfileMenu";
-import "./Navbar.css";
+import "./NavBar.css";
 
 export const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
 

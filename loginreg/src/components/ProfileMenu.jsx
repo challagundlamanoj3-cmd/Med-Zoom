@@ -9,7 +9,8 @@ function ProfileMenu({ isLoggedIn, setIsLoggedIn }) {
 
     const handleLogout = async () => {
         try {
-            await axios.post("http://10.189.170.206:3001/logout", {}, { withCredentials: true });
+            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+            await axios.post(`${apiBaseUrl}/logout`, {}, { withCredentials: true });
 
             setIsLoggedIn(false);
             setOpen(false);
