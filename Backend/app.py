@@ -169,12 +169,11 @@ def send_otp():
 
     success = send_otp_email(email, otp)
     
-    # Always return the OTP in development mode for debugging
-    if not success or True:  # Always return OTP for debugging
-        print(f"⚠ Email failed or in debug mode → Using fallback OTP: {otp}")
-        otp_store[email]["otp"] = otp
-        return jsonify({"message": "OTP sent (dev mode)", "dev_otp": otp}), 200
-
+    if not success:
+        print(f"⚠ Failed to send OTP email to {email}")
+        return jsonify({"error": "Failed to send OTP email. Please check your email address and try again."}), 500
+    
+    print(f"✅ OTP email sent successfully to {email}")
     return jsonify({"message": "OTP sent successfully"}), 200
 
 
