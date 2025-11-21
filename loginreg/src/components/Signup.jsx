@@ -35,7 +35,7 @@ function SignUp() {
             } else if (err.request) {
                 // The request was made but no response was received
                 console.error("Send OTP Error - No response received:", err.request);
-                window.alert("Network error: Please check your internet connection and ensure the backend service is running.");
+                window.alert("Network error: Please check your internet connection and ensure the backend service is running at " + api.sendOtp);
             } else {
                 // Something happened in setting up the request that triggered an Error
                 console.error("Send OTP Error:", err.message);

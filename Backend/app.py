@@ -145,36 +145,64 @@ def test():
 # ---------------- HEALTH CHECK ENDPOINT ----------------
 @app.get("/health")
 def health_check():
-    return jsonify({"status": "healthy", "timestamp": datetime.datetime.utcnow()}), 200
+    try:
+        # Test database connection
+        db.command('ping')
+        return jsonify({
+            "status": "healthy", 
+            "timestamp": datetime.datetime.utcnow(),
+            "database": "connected",
+            "service": "backend-running"
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy", 
+            "timestamp": datetime.datetime.utcnow(),
+            "error": str(e),
+            "service": "backend-running"
+        }), 500
 
 
 # ---------------- SEND OTP ----------------
 @app.post("/send-otp")
 def send_otp():
-    data = request.json
+    try:
+        print("[SEND OTP] Request received")
+        print(f"[SEND OTP] Request data: {request.json}")
+        
+        data = request.json
 
-    if not data:
-        return jsonify({"error": "Invalid request"}), 400
+        if not data:
+            return jsonify({"error": "Invalid request"}), 400
 
-    email = data["email"]
+        email = data["email"]
+        print(f"[SEND OTP] Processing email: {email}")
 
-    if users.find_one({"email": email}):
-        return jsonify({"error": "Email already exists"}), 400
+        if users.find_one({"email": email}):
+            print(f"[SEND OTP] Email already exists: {email}")
+            return jsonify({"error": "Email already exists"}), 400
 
-    otp = generate_otp()
-    otp_store[email] = {
-        "otp": otp,
-        "expires": datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
-    }
+        otp = generate_otp()
+        print(f"[SEND OTP] Generated OTP: {otp}")
+        
+        otp_store[email] = {
+            "otp": otp,
+            "expires": datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+        }
 
-    success = send_otp_email(email, otp)
-    
-    if not success:
-        print(f"⚠ Failed to send OTP email to {email}")
-        return jsonify({"error": "Failed to send OTP email. Please check your email address and try again."}), 500
-    
-    print(f"✅ OTP email sent successfully to {email}")
-    return jsonify({"message": "OTP sent successfully"}), 200
+        success = send_otp_email(email, otp)
+        
+        if not success:
+            print(f"⚠ Failed to send OTP email to {email}")
+            return jsonify({"error": "Failed to send OTP email. Please check your email address and try again."}), 500
+        
+        print(f"✅ OTP email sent successfully to {email}")
+        return jsonify({"message": "OTP sent successfully"}), 200
+    except Exception as e:
+        print(f"[SEND OTP] Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "Internal server error"}), 500
 
 
 # ---------------- SIGNUP ----------------
