@@ -160,7 +160,13 @@ def test():
     response = jsonify({
         "message": "Backend running!", 
         "status": "success",
-        "timestamp": datetime.datetime.utcnow()
+        "timestamp": datetime.datetime.utcnow(),
+        "environment": {
+            "MONGO_URI": bool(os.getenv("MONGO_URI")),
+            "JWT_SECRET": bool(os.getenv("JWT_SECRET")),
+            "EMAIL_ADDRESS": bool(os.getenv("EMAIL_ADDRESS")),
+            "EMAIL_PASSWORD": bool(os.getenv("EMAIL_PASSWORD"))
+        }
     })
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, 200
@@ -168,26 +174,43 @@ def test():
 # ---------------- HEALTH CHECK ENDPOINT ----------------
 @app.get("/health")
 def health_check():
+    print("[HEALTH] Health check endpoint accessed")
+    
+    # Check environment variables
+    env_check = {
+        "MONGO_URI": bool(os.getenv("MONGO_URI")),
+        "JWT_SECRET": bool(os.getenv("JWT_SECRET")),
+        "EMAIL_ADDRESS": bool(os.getenv("EMAIL_ADDRESS")),
+        "EMAIL_PASSWORD": bool(os.getenv("EMAIL_PASSWORD"))
+    }
+    
+    print(f"[HEALTH] Environment variables check: {env_check}")
+    
+    # Check database connection
+    db_status = "unknown"
     try:
-        # Test database connection
+        print("[HEALTH] Testing database connection...")
         db.command('ping')
-        response = jsonify({
-            "status": "healthy", 
-            "timestamp": datetime.datetime.utcnow(),
-            "database": "connected",
-            "service": "backend-running"
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 200
+        db_status = "connected"
+        print("[HEALTH] Database connection successful!")
     except Exception as e:
-        response = jsonify({
-            "status": "unhealthy", 
-            "timestamp": datetime.datetime.utcnow(),
-            "error": str(e),
-            "service": "backend-running"
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
+        db_status = f"error: {str(e)}"
+        print(f"[HEALTH] Database connection failed: {e}")
+    
+    # Overall status
+    overall_status = "healthy" if all(env_check.values()) and db_status == "connected" else "unhealthy"
+    
+    response = jsonify({
+        "status": overall_status,
+        "timestamp": datetime.datetime.utcnow(),
+        "environment": env_check,
+        "database": db_status,
+        "service": "backend-running"
+    })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    
+    print(f"[HEALTH] Health check response: {overall_status}")
+    return response, 200 if overall_status == "healthy" else 500
 
 
 # ---------------- SEND OTP ----------------
@@ -437,6 +460,23 @@ if __name__ == "__main__":
     print(f"[STARTUP] JWT_SECRET present: {bool(os.getenv('JWT_SECRET'))}")
     print(f"[STARTUP] EMAIL_ADDRESS present: {bool(os.getenv('EMAIL_ADDRESS'))}")
     print(f"[STARTUP] EMAIL_PASSWORD present: {bool(os.getenv('EMAIL_PASSWORD'))}")
+    
+    # Validate required environment variables
+    required_vars = ['MONGO_URI', 'JWT_SECRET']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    if missing_vars:
+        print(f"[STARTUP] ERROR: Missing required environment variables: {missing_vars}")
+        exit(1)
+    
+    # Test database connection before starting
+    try:
+        print("[STARTUP] Testing database connection...")
+        client.server_info()
+        print("[STARTUP] Database connection successful!")
+    except Exception as e:
+        print(f"[STARTUP] ERROR: Database connection failed: {e}")
+        exit(1)
     
     # Use the PORT environment variable provided by Render, default to 3001 for local development
     port = int(os.environ.get("PORT", 3001))
