@@ -25,20 +25,9 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 app = Flask(__name__)
 
-# Global database connection
-client = None
-db = None
-users = None
-
-# Initialize database connection
-try:
-    if MONGO_URI:
-        client = MongoClient(MONGO_URI)
-        db = client["medzoom"]
-        users = db["users"]
-except Exception as e:
-    print(f"Database connection error: {e}")
-
+client = MongoClient(MONGO_URI)
+db = client["medzoom"]
+users = db["users"]
 otp_store = {}  # Use Redis in production
 
 CORS(
@@ -150,11 +139,8 @@ def health_check():
     # Check database connection
     db_status = "unknown"
     try:
-        if client:
-            client.server_info()
-            db_status = "connected"
-        else:
-            db_status = "not configured"
+        db.command('ping')
+        db_status = "connected"
     except Exception as e:
         db_status = f"error: {str(e)}"
     
@@ -183,7 +169,7 @@ def send_otp():
 
         email = data["email"]
 
-        if users and users.find_one({"email": email}):
+        if users.find_one({"email": email}):
             return jsonify({"error": "Email already exists"}), 400
 
         otp = generate_otp()
@@ -220,10 +206,10 @@ def signup():
     password = data["password"]
     otp = data["otp"]
 
-    if users and users.find_one({"email": email}):
+    if users.find_one({"email": email}):
         return jsonify({"error": "Email exists"}), 400
 
-    if users and users.find_one({"username": username}):
+    if users.find_one({"username": username}):
         return jsonify({"error": "Username taken"}), 400
 
     if email not in otp_store:
@@ -240,12 +226,11 @@ def signup():
 
     hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 
-    if users:
-        users.insert_one({
-            "username": username,
-            "email": email,
-            "password": hashed_pw
-        })
+    users.insert_one({
+        "username": username,
+        "email": email,
+        "password": hashed_pw
+    })
 
     response = jsonify({"message": "User created"})
     response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
@@ -262,7 +247,7 @@ def login():
     username = data["username"]
     password = data["password"]
 
-    user = users and users.find_one({"username": username})
+    user = users.find_one({"username": username})
     if not user:
         return jsonify("User does not exist"), 400
 
@@ -318,7 +303,7 @@ def get_user():
     try:
         decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         
-        user = users and users.find_one({"_id": ObjectId(decoded["user_id"])}, {"password": 0})
+        user = users.find_one({"_id": ObjectId(decoded["user_id"])}, {"password": 0})
         
         if user:
             user["_id"] = str(user["_id"])
@@ -366,11 +351,8 @@ if __name__ == "__main__":
     
     # Test database connection before starting
     try:
-        if client:
-            client.server_info()
-            print("Database connection successful")
-        else:
-            print("WARNING: Database not configured")
+        client.server_info()
+        print("Database connection successful")
     except Exception as e:
         print(f"ERROR: Database connection failed: {e}")
         exit(1)
