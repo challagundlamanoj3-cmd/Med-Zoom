@@ -127,7 +127,7 @@ def generate_otp():
     return "".join(random.choices(string.digits, k=6))
 
 # ---------------- HEALTH CHECK ENDPOINT ----------------
-@app.get("/health")
+@app.route("/health", methods=["GET"])
 def health_check():
     # Check environment variables
     env_check = {
@@ -160,7 +160,7 @@ def health_check():
     return response, 200 if overall_status == "healthy" else 500
 
 # ---------------- SEND OTP ----------------
-@app.post("/send-otp")
+@app.route("/send-otp", methods=["POST"])
 def send_otp():
     try:
         data = request.json
@@ -196,7 +196,7 @@ def send_otp():
         return jsonify({"error": "Internal server error"}), 500
 
 # ---------------- SIGNUP ----------------
-@app.post("/signup")
+@app.route("/signup", methods=["POST"])
 def signup():
     data = request.json
     if not data:
@@ -239,7 +239,7 @@ def signup():
     return response, 201
 
 # ---------------- LOGIN ----------------
-@app.post("/login")
+@app.route("/login", methods=["POST"])
 def login():
     data = request.json
     if not data:
@@ -286,7 +286,7 @@ def login():
     return resp
 
 # ---------------- GET USER ----------------
-@app.get("/user")
+@app.route("/user", methods=["GET"])
 def get_user():
     # First try to get token from Authorization header (Bearer token)
     auth_header = request.headers.get('Authorization')
@@ -320,7 +320,7 @@ def get_user():
         return response
 
 # ---------------- LOGOUT ----------------
-@app.post("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
     resp = make_response(jsonify("Logged out"))
     # Configure cookie for production deployment
