@@ -55,7 +55,7 @@ EMAIL_PASSWORD=your_email_app_password
 Add this environment variable for the frontend:
 
 ```
-VITE_API_BASE_URL=https://your-render-backend-url.onrender.com
+VITE_API_BASE_URL=https://med-zoom.onrender.com
 ```
 
 (Note: You'll get the actual backend URL after deploying the backend service)

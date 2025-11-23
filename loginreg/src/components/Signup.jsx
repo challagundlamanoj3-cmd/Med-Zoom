@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import api from "../utils/api";
+import api, { API_BASE_URL } from "../utils/api";
 import "./Signup.css";
 
 function SignUp() {
@@ -21,20 +21,54 @@ function SignUp() {
         
         setLoading(true);
         try {
-            console.log("[SEND OTP] Attempting to send OTP to:", email);
-            console.log("[SEND OTP] API endpoint:", api.sendOtp);
-            
             // Configure axios with proper settings
             const config = {
-                timeout: 10000, // 10 second timeout
+                timeout: 15000, // 15 second timeout
                 withCredentials: true,
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
             };
             
+            // First, check if backend is running
+            try {
+                console.log("Checking backend health at:", api.health);
+                const healthConfig = {
+                    timeout: 5000, // 5 second timeout
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                };
+                const healthResponse = await axios.get(api.health, healthConfig);
+                console.log("Backend is running and healthy:", healthResponse.data);
+            } catch (healthErr) {
+                console.error("Backend health check failed:", healthErr);
+                // Show error to user if health check fails
+                if (healthErr.request && !healthErr.response) {
+                    const errorMsg = `Backend server is not running or not accessible.\n\n` +
+                        `Please ensure:\n` +
+                        `1. Backend server is running\n` +
+                        `2. Backend URL: ${API_BASE_URL}\n` +
+                        `3. No firewall is blocking the connection\n\n` +
+                        `To start the backend:\n` +
+                        `cd Backend\n` +
+                        `python app.py`;
+                    window.alert(errorMsg);
+                    setLoading(false);
+                    return;
+                }
+                // If it's a different error, log it but continue
+                console.warn("Health check failed, but proceeding with OTP request...");
+            }
+            
+            console.log("Sending OTP request to:", api.sendOtp);
+            console.log("Request data:", { email });
+            
             const response = await axios.post(api.sendOtp, { email }, config);
-            console.log("[SEND OTP] Response received:", response);
+            
+            console.log("OTP response:", response);
             
             if (response.status === 200) {
                 window.alert("OTP sent to your email. Please check your inbox.");
@@ -44,19 +78,30 @@ function SignUp() {
                 });
             }
         } catch (err) {
-            console.error("[SEND OTP] Error occurred:", err);
+            console.error("OTP Error:", err); // For debugging
+            console.error("Error details:", {
+                message: err.message,
+                code: err.code,
+                response: err.response,
+                request: err.request
+            });
             
             if (err.response) {
                 // Server responded with error status
-                console.error("[SEND OTP] Response error:", err.response.status, err.response.data);
                 window.alert("Server error: " + (err.response.data.error || err.response.data || "Unknown server error"));
             } else if (err.request) {
                 // Request was made but no response received
-                console.error("[SEND OTP] No response received:", err.request);
-                window.alert("Network error: Please check your internet connection and ensure the backend service is running at " + api.sendOtp);
+                const errorMsg = `Network error: Unable to connect to backend server.\n\n` +
+                    `Please ensure:\n` +
+                    `1. Backend server is running (check Backend folder)\n` +
+                    `2. Backend is accessible at: ${api.sendOtp}\n` +
+                    `3. No firewall is blocking the connection\n\n` +
+                    `To start the backend, run:\n` +
+                    `cd Backend\n` +
+                    `python app.py`;
+                window.alert(errorMsg);
             } else {
                 // Something happened in setting up the request
-                console.error("[SEND OTP] Request setup error:", err.message);
                 window.alert("Failed to send OTP: " + err.message);
             }
         } finally {

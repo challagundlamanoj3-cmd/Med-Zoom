@@ -14,7 +14,7 @@ function App() {
 
   // Check if user already logged in (cookie/session)
   useEffect(() => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
     
     // Configure axios to send credentials
     const config = {
@@ -33,7 +33,6 @@ function App() {
         }
       })
       .catch(error => {
-        console.error("Error fetching user data:", error);
         setIsLoggedIn(false);
       });
   }, []);

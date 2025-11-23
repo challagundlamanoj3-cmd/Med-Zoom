@@ -9,14 +9,13 @@ function ProfileMenu({ isLoggedIn, setIsLoggedIn }) {
 
     const handleLogout = async () => {
         try {
-            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
             await axios.post(`${apiBaseUrl}/logout`, {}, { withCredentials: true });
 
             setIsLoggedIn(false);
             setOpen(false);
             navigate("/login");
         } catch (error) {
-            console.error("Error logging out:", error);
             // Still logout on frontend even if backend fails
             setIsLoggedIn(false);
             setOpen(false);

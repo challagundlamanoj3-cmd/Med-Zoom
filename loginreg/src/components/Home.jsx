@@ -35,7 +35,6 @@ function Home() {
       } catch (error) {
         if (!isMounted) return;
         
-        console.error("Error fetching user data:", error);
         setError(error.message || "Failed to load user data");
         setLoading(false);
         

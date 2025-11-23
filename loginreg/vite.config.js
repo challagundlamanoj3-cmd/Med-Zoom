@@ -10,8 +10,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify(env.VITE_API_BASE_URL)
     },
     server: {
-      host: true, // Expose to network
-      port: 5173
+      host: true // Expose to network
     },
     build: {
       rollupOptions: {

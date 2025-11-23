@@ -45,11 +45,9 @@ function OtpVerification() {
                 window.alert(err.response.data.error);
             } else if (err.request) {
                 // The request was made but no response was received
-                console.error("Verification Error - No response received:", err.request);
                 window.alert("Network error: Please check your internet connection and ensure the backend service is running.");
             } else {
                 // Something happened in setting up the request that triggered an Error
-                console.error("Verification Error:", err.message);
                 window.alert("Verification failed: " + err.message);
             }
         } finally {
