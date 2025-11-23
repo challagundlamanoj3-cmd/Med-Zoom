@@ -309,9 +309,15 @@ def get_user():
         if user:
             user["_id"] = str(user["_id"])
 
-        return jsonify({"user": user})
+        response = jsonify({"user": user})
+        response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
     except Exception as e:
-        return jsonify({"user": None})
+        response = jsonify({"user": None})
+        response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
 
 # ---------------- LOGOUT ----------------
 @app.post("/logout")
