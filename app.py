@@ -6,7 +6,7 @@ backend_path = os.path.join(os.path.dirname(__file__), 'Backend')
 sys.path.insert(0, backend_path)
 
 # Import the app from the Backend directory
-from app import app
+from Backend.app import app
 
 if __name__ == "__main__":
     # Use the PORT environment variable provided by Render, default to 3001 for local development
