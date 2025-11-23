@@ -25,9 +25,20 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 app = Flask(__name__)
 
-client = MongoClient(MONGO_URI)
-db = client["medzoom"]
-users = db["users"]
+# Initialize database connection later
+class Database:
+    def __init__(self):
+        self.client = None
+        self.db = None
+        self.users = None
+    
+    def init_app(self, app):
+        if MONGO_URI:
+            self.client = MongoClient(MONGO_URI)
+            self.db = self.client["medzoom"]
+            self.users = self.db["users"]
+
+db = Database()
 otp_store = {}  # Use Redis in production
 
 CORS(
@@ -139,8 +150,11 @@ def health_check():
     # Check database connection
     db_status = "unknown"
     try:
-        db.command('ping')
-        db_status = "connected"
+        if db.client:
+            db.client.server_info()
+            db_status = "connected"
+        else:
+            db_status = "not configured"
     except Exception as e:
         db_status = f"error: {str(e)}"
     
@@ -169,7 +183,7 @@ def send_otp():
 
         email = data["email"]
 
-        if users.find_one({"email": email}):
+        if db.users.find_one({"email": email}):
             return jsonify({"error": "Email already exists"}), 400
 
         otp = generate_otp()
@@ -206,10 +220,10 @@ def signup():
     password = data["password"]
     otp = data["otp"]
 
-    if users.find_one({"email": email}):
+    if db.users.find_one({"email": email}):
         return jsonify({"error": "Email exists"}), 400
 
-    if users.find_one({"username": username}):
+    if db.users.find_one({"username": username}):
         return jsonify({"error": "Username taken"}), 400
 
     if email not in otp_store:
@@ -226,7 +240,7 @@ def signup():
 
     hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 
-    users.insert_one({
+    db.users.insert_one({
         "username": username,
         "email": email,
         "password": hashed_pw
@@ -247,7 +261,7 @@ def login():
     username = data["username"]
     password = data["password"]
 
-    user = users.find_one({"username": username})
+    user = db.users.find_one({"username": username})
     if not user:
         return jsonify("User does not exist"), 400
 
@@ -303,7 +317,7 @@ def get_user():
     try:
         decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         
-        user = users.find_one({"_id": ObjectId(decoded["user_id"])}, {"password": 0})
+        user = db.users.find_one({"_id": ObjectId(decoded["user_id"])}, {"password": 0})
         
         if user:
             user["_id"] = str(user["_id"])
@@ -349,10 +363,16 @@ if __name__ == "__main__":
         print(f"ERROR: Missing required environment variables: {missing_vars}")
         exit(1)
     
+    # Initialize database
+    db.init_app(app)
+    
     # Test database connection before starting
     try:
-        client.server_info()
-        print("Database connection successful")
+        if db.client:
+            db.client.server_info()
+            print("Database connection successful")
+        else:
+            print("WARNING: Database not configured")
     except Exception as e:
         print(f"ERROR: Database connection failed: {e}")
         exit(1)
