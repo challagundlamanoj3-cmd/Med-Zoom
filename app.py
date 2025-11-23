@@ -8,7 +8,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'Backend'))
 
 # Import the app from Backend/app.py
-from app import app
+from Backend.app import app
 
 if __name__ == "__main__":
     # This is just a fallback for local development
