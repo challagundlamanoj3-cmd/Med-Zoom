@@ -9,7 +9,7 @@ function ProfileMenu({ isLoggedIn, setIsLoggedIn }) {
 
     const handleLogout = async () => {
         try {
-            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "https://med-zoom.onrender.com";
             await axios.post(`${apiBaseUrl}/logout`, {}, { withCredentials: true });
 
             setIsLoggedIn(false);

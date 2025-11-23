@@ -14,7 +14,7 @@ function App() {
 
   // Check if user already logged in (cookie/session)
   useEffect(() => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "https://med-zoom.onrender.com";
     
     // Configure axios to send credentials
     const config = {

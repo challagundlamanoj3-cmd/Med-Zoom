@@ -1,5 +1,5 @@
 // Utility file for API calls
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://med-zoom.onrender.com";
 
 export const api = {
   // Auth endpoints
