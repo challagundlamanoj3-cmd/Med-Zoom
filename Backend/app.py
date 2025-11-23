@@ -347,15 +347,19 @@ if __name__ == "__main__":
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     
     if missing_vars:
+        print(f"ERROR: Missing required environment variables: {missing_vars}")
         exit(1)
     
     # Test database connection before starting
     try:
         client.server_info()
+        print("Database connection successful")
     except Exception as e:
+        print(f"ERROR: Database connection failed: {e}")
         exit(1)
     
     # Use the PORT environment variable provided by Render, default to 3001 for local development
     port = int(os.environ.get("PORT", 3001))
+    print(f"Starting server on port {port}")
     
     app.run(host="0.0.0.0", port=port, debug=False)
