@@ -34,7 +34,8 @@ CORS(
     app,
     supports_credentials=True,
     origins=[
-        "https://med-zoom-1.onrender.com"   # Production frontend
+        "https://med-zoom-1.onrender.com",  # Production frontend
+        "https://med-zoom.onrender.com"    # Backend URL (for health checks, etc.)
     ],
     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"],
     methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
@@ -183,11 +184,13 @@ def send_otp():
         
         if not success:
             response = jsonify({"error": "Failed to send OTP email. Please check your email address and try again."})
-            response.headers.add('Access-Control-Allow-Origin', '*')
+            response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+            response.headers.add('Access-Control-Allow-Credentials', 'true')
             return response, 500
         
         response = jsonify({"message": "OTP sent successfully"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response, 200
     except Exception as e:
         return jsonify({"error": "Internal server error"}), 500
@@ -230,7 +233,10 @@ def signup():
         "password": hashed_pw
     })
 
-    return jsonify({"message": "User created"}), 201
+    response = jsonify({"message": "User created"})
+    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response, 201
 
 # ---------------- LOGIN ----------------
 @app.post("/login")
@@ -325,6 +331,8 @@ def logout():
         cookie_kwargs["secure"] = False
     
     resp.set_cookie("token", "", **cookie_kwargs)
+    resp.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+    resp.headers.add('Access-Control-Allow-Credentials', 'true')
     return resp
 
 if __name__ == "__main__":
