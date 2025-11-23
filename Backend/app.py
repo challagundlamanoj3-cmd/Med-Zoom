@@ -34,8 +34,7 @@ CORS(
     app,
     supports_credentials=True,
     origins=[
-        "https://med-zoom-1.onrender.com",  # Production frontend
-        "https://med-zoom.onrender.com"    # Backend URL (for health checks, etc.)
+        "https://med-zoom-1.onrender.com"  # Production frontend
     ],
     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"],
     methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
