@@ -25,7 +25,7 @@ Render deploys from Git repositories. You'll need to either:
    - Name: `medzoom-backend`
    - Environment: Python 3
    - Build command: `pip install -r requirements.txt`
-   - Start command: `gunicorn --bind 0.0.0.0:$PORT app:app`
+   - Start command: `gunicorn --bind 0.0.0.0:$PORT Backend.app:app`
    - Branch: main (or master)
 
 ### 3. Configure Environment Variables for Backend

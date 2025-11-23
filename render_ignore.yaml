@@ -17,7 +17,7 @@ services:
     name: medzoom-backend
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT Backend.app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16

@@ -49,7 +49,7 @@ This document summarizes all the changes made to enable deployment of the MED ZO
 2. **Backend Service (medzoom-backend)**
    - Type: Web service (Python)
    - Build command: `pip install -r requirements.txt`
-   - Start command: `gunicorn --bind 0.0.0.0:$PORT app:app`
+   - Start command: `gunicorn --bind 0.0.0.0:$PORT Backend.app:app`
    - Environment variables for MongoDB, JWT, and email configuration
 
 ### Required Manual Configuration
