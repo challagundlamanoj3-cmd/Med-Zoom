@@ -158,6 +158,7 @@ def logout():
     return resp
 
 
+
 # ---------------- FIX: HANDLE OPTIONS REQUEST ----------------
 @app.before_request
 def preflight():
@@ -172,6 +173,23 @@ def preflight():
 
 # ---------------- START SERVER ----------------
 if __name__ == "__main__":
-    print("🚀 Starting server...")
-    port = int(os.getenv("PORT", 3001))
+    print("🚀 Starting backend...")
+    
+    required_vars = ['MONGO_URI', 'JWT_SECRET']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+
+    if missing_vars:
+        print(f"⚠ WARNING: Missing environment variables: {missing_vars}")
+        print("Backend will still run, but some features may not work.")
+
+    # Test MongoDB
+    try:
+        client.server_info()
+        print("Database connection OK")
+    except Exception as e:
+        print(f"⚠ DB Connection Issue: {e}")
+
+    port = int(os.environ.get("PORT", 3001))
+    print(f"Running on port {port}")
+
     app.run(host="0.0.0.0", port=port, debug=False)
