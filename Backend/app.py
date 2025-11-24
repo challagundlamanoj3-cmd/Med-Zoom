@@ -33,9 +33,11 @@ otp_store = {}  # Use Redis in production
 CORS(
     app,
     supports_credentials=True,
-    origins=[
-        "https://med-zoom-1.onrender.com"  # Production frontend
-    ],
+   origins=[
+    "https://med-zoom-1.onrender.com",
+    "https://med-zoom.onrender.com",
+],
+
     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"],
     methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
     expose_headers=["Access-Control-Allow-Credentials", "Access-Control-Allow-Origin"],
@@ -340,14 +342,25 @@ def logout():
     resp.headers.add('Access-Control-Allow-Credentials', 'true')
     return resp
 
+@app.before_request
+def handle_options():
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers["Access-Control-Allow-Origin"] = request.headers.get("Origin", "*")
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        return response, 200
+
 if __name__ == "__main__":
     # Validate required environment variables
     required_vars = ['MONGO_URI', 'JWT_SECRET']
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     
-    if missing_vars:
-        print(f"ERROR: Missing required environment variables: {missing_vars}")
-        exit(1)
+if missing_vars:
+    print(f"⚠ WARNING: Missing environment variables: {missing_vars}")
+    print("Backend will still run, but some features may not work.")
+
     
     # Test database connection before starting
     try:
